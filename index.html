@@ -1,0 +1,40 @@
+// GANTI URL DI BAWAH DENGAN URL WEB APP DARI GOOGLE APPS SCRIPT KAMU
+const scriptURL = 'https://script.google.com/macros/s/AKfycbxR32QZ3c9AiUP_HOuh7B1BGD7ZuXY5LznV9GkzRIVYKg2p7-2hCwz5zCtwpRN53L46vA/exec'; 
+
+function kirimDataKeDatabase(nama, jawaban, isBenar) {
+  const tombolKirim = document.getElementById('btn-kirim'); // Sesuaikan ID tombol
+  const statusPesan = document.getElementById('status-pesan'); // Tempat menampilkan teks sukses/loading
+  
+  tombolKirim.disabled = true;
+  statusPesan.innerHTML = "Sedang menyimpan data ke database...";
+  statusPesan.style.color = "blue";
+
+  // Data yang akan dikirim
+  const dataSiswa = {
+    nama: nama,
+    jawaban: jawaban + " m",
+    status: isBenar ? "Benar (100)" : "Salah (0)"
+  };
+
+  fetch(scriptURL, {
+    method: 'POST',
+    // Gunakan text/plain untuk menghindari error CORS (aturan keamanan browser)
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
+    body: JSON.stringify(dataSiswa)
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.status === "success") {
+      statusPesan.innerHTML = "Berhasil! Skor kamu sudah tersimpan di database guru.";
+      statusPesan.style.color = "green";
+    }
+  })
+  .catch(error => {
+    statusPesan.innerHTML = "Terjadi kesalahan saat menyimpan data.";
+    statusPesan.style.color = "red";
+    console.error('Error!', error.message);
+  })
+  .finally(() => {
+    tombolKirim.disabled = false;
+  });
+}
